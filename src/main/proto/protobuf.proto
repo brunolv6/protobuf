@@ -1,20 +1,50 @@
-syntax = "proto3";
+syntax = "proto3"; // versao/sintaxe indicada pelo google
 
-option java_multiple_files = true;
-option java_package = "br.com.zup.edu";
-option java_outer_classname = "Protobuf";
-option objc_class_prefix = "HLW";
+option java_multiple_files = true; // gerado em múltiplos arquivos, o mais comum, mas pode ser tudo em um só com false
+option java_package = "br.com.zup.edu"; // gerar dentro deste pacote
+option java_outer_classname = "FuncionarioServiceOuterClass"; // nome da classe que guardara todos os dados, pode ser qualquer nome
+// option objc_class_prefix = "HLW"; gerar para linguagem object-c também - opcional
 
-package br.com.zup.edu;
+package br.com.zup.edu; // definicao do pacote onde as classe serão geradas (acho que automaticamente)
 
-service ProtobufService {
-  rpc send (ProtobufRequest) returns (ProtobufReply) {}
+import "google/protobuf/timestamp.proto";
+
+service FuncionarioService {
+
+  // definicao de funcionalidade do servico de forma declarativa
+  // o que envia e o que espera receber
+  rpc cadastrar(FuncionarioRequest) returns (FuncionarioResponse) {}
+
 }
 
-message ProtobufRequest {
-  string name = 1;
+enum Cargo {
+  DEV = 0; // novamente defino uma referencia e não transito o nome DEV, e apenas o 0 - valor default não é nem passado, será assumido se não houver que é este
+  QA = 1;
+  GERENTE = 3;
 }
 
-message ProtobufReply {
-  string message = 1;
+// definicao da estrutura desta mensagem
+message FuncionarioRequest {
+  string nome = 1; // tenho que definir a posicao do valor, pq desta forma posso trafegar os dados sem a descricao, apenas com seu valor, e a gRPC app que receber sabera que 1, por exemplo neste caso se refere a nome, o que da mais segurança, já que nem o xml e nem o json faz isto
+  string cpf = 2;
+  int32 idade = 3;
+  double salario = 4;
+  bool ativo = 5;
+  Cargo cargo = 6; // criando tipo proprio, pode ser um enum
+
+  message Endereco {
+    string logradouro = 1;
+    string cep = 2;
+    string complemento = 3;
+  }
+  repeated Endereco enderecos = 7; // repeated -> significa que é um lista e tenho a definicao mais completade Endereco acima
 }
+
+// definicao da estrutura desta mensagem
+message FuncionarioResponse {
+  string nome = 1;
+  google.protobuf.Timestamp criadoEM = 2; // posso utilizar o criado pelo google mas devo importar em cima
+}
+
+
+
